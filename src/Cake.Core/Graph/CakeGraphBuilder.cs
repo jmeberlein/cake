@@ -52,6 +52,12 @@ namespace Cake.Core.Graph
                     }
                 }
             }
+
+            if (graph.ContainsCycles())
+            {
+                throw new CakeException("Graph contains cyclic dependencies");
+            }
+
             return graph;
         }
     }
