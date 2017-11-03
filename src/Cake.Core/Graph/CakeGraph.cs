@@ -13,6 +13,7 @@ namespace Cake.Core.Graph
         internal sealed class CakeGraphNode
         {
             private static int indexCtr = 0;
+            private static Stack<CakeGraphNode> stack = new Stack<CakeGraphNode>();
 
             internal string Name { get; private set; }
 
@@ -20,7 +21,7 @@ namespace Cake.Core.Graph
 
             internal int MinIndex { get; private set; }
 
-            internal int UpCount { get; set; }
+            internal int DownCount { get; set; }
 
             // Implement a doubly-linked directed graph.
             // Up and Down are chosen for "colors" based on the visual
@@ -36,7 +37,7 @@ namespace Cake.Core.Graph
             internal CakeGraphNode(string name)
             {
                 this.Name = name;
-                Index = MinIndex = UpCount = 0;
+                Index = MinIndex = DownCount = 0;
                 UpOut = new List<CakeGraphNode>();
                 UpIn = new List<CakeGraphNode>();
                 DownOut = new List<CakeGraphNode>();
@@ -44,7 +45,7 @@ namespace Cake.Core.Graph
             }
 
             // Labels nodes with Tarjan's strongly connected components algorithm
-            // 
+            //
             // After execution, if index == min_index for all nodes, there are no
             // cycles in the graph. Down Out and Up In are used, because it is
             // checking for dependency cycles, so Up edges are considered to be
@@ -53,9 +54,11 @@ namespace Cake.Core.Graph
             {
                 if (MinIndex == 0)
                 {
+                    stack.Push(this);
+
                     Index = MinIndex = ++indexCtr;
 
-                    foreach (CakeGraphNode node in DownOut.Concat(UpIn))
+                    foreach (CakeGraphNode node in DownOut.Concat(UpIn).Where(x => stack.Contains(x) || x.Index == 0))
                     {
                         int temp = node.Tarjan();
                         if (temp < MinIndex)
@@ -63,12 +66,16 @@ namespace Cake.Core.Graph
                             MinIndex = temp;
                         }
                     }
+
+                    stack.Pop();
                 }
                 return MinIndex;
             }
         }
 
         private readonly List<CakeGraphNode> _nodes;
+
+        public IReadOnlyList<CakeGraphNode> Nodes => _nodes;
 
         public CakeGraph()
         {
@@ -158,46 +165,47 @@ namespace Cake.Core.Graph
                 return Enumerable.Empty<string>();
             }
 
-            // UpCount is the number of uncompleted tasks that must be run before the given task, plus one
-            // Its value is used for the second traversal and generating a total order, while the plus one
-            // allows it to be used as a marker for visited nodes in the initial BFS
             var targetNode = _nodes.Find(x => x.Name.Equals(target, StringComparison.OrdinalIgnoreCase));
             var poset = new List<CakeGraphNode>() { targetNode };
 
             for (int i = 0; i < poset.Count; i++)
             {
-                foreach (CakeGraphNode node in poset[i].DownOut.Concat(poset[i].UpOut))
+                foreach (CakeGraphNode node in poset[i].DownOut.Union(poset[i].UpOut))
                 {
-                    if (node.UpCount == 0)
+                    if (!poset.Contains(node))
                     {
-                        node.UpCount = node.UpOut.Count + node.DownIn.Count + 1;
+                        node.DownCount = node.UpIn.Count + node.DownOut.Count + 1;
                         poset.Add(node);
                     }
                 }
             }
 
+            poset.ForEach(node => node.DownCount = node.UpIn.Union(node.DownOut).Intersect(poset).Count());
+            var root = poset.Where(x => x.DownCount == 0).ToList();
+
             var result = new List<string>();
-            foreach (CakeGraphNode node in poset)
+
+            foreach (CakeGraphNode curr in root)
             {
-                // Check before calling traverse, because UpCount should only be decremented
-                // during the actual traversal
-                if (node.UpCount == 1)
+                result.Add(curr.Name);
+                foreach (CakeGraphNode node in curr.UpOut.Concat(curr.DownIn))
                 {
-                    Traverse(node, result);
+                    Traverse(node, result, poset);
                 }
             }
 
             return result;
         }
 
-        private void Traverse(CakeGraphNode curr, List<string> result)
+        private void Traverse(CakeGraphNode curr, List<string> result, List<CakeGraphNode> poset)
         {
-            if (--curr.UpCount == 0)
+            if (--curr.DownCount == 0)
             {
                 result.Add(curr.Name);
-                foreach (CakeGraphNode node in curr.UpOut.Concat(curr.DownIn))
+
+                foreach (CakeGraphNode node in curr.UpOut.Union(curr.DownIn).Intersect(poset))
                 {
-                    Traverse(node, result);
+                    Traverse(node, result, poset);
                 }
             }
         }

@@ -167,6 +167,48 @@ namespace Cake.Core.Tests.Unit
             }
 
             [Fact]
+            public async Task Should_Follow_Post_Dependencies()
+            {
+                // Given
+                var result = new List<string>();
+                var fixture = new CakeEngineFixture();
+                var engine = fixture.CreateEngine();
+                engine.RegisterTask("A").Does(() => result.Add("A"));
+                engine.RegisterTask("B").IsDependentOn("A").IsDependentOn("C", predependency: false).Does(() => result.Add("B"));
+                engine.RegisterTask("C").IsDependentOn("B").IsDependentOn("D", predependency: false).Does(() => result.Add("C"));
+                engine.RegisterTask("D").Does(() => { result.Add("D"); });
+
+                // When
+                await engine.RunTargetAsync(fixture.Context, fixture.ExecutionStrategy, "B");
+
+                // Then
+                Assert.Equal(4, result.Count);
+                Assert.Equal("A", result[0]);
+                Assert.Equal("B", result[1]);
+                Assert.Equal("C", result[2]);
+                Assert.Equal("D", result[3]);
+            }
+
+            [Fact]
+            public async Task Should_Respect_Post_Dependencies()
+            {
+                // Given
+                var result = new List<string>();
+                var fixture = new CakeEngineFixture();
+                var engine = fixture.CreateEngine();
+                engine.RegisterTask("A").Does(() => result.Add("A"));
+                engine.RegisterTask("B").IsDependentOn("A").IsDependentOn("C", predependency: false).Does(() => result.Add("B"));
+                engine.RegisterTask("C").IsDependentOn("B").IsDependentOn("D", predependency: false).Does(() => result.Add("C"));
+                engine.RegisterTask("D").Does(() => { result.Add("D"); });
+
+                // When
+                await engine.RunTargetAsync(fixture.Context, fixture.ExecutionStrategy, "D");
+
+                // Then
+                Assert.Equal("D", result[0]);
+            }
+
+            [Fact]
             public async Task Should_Skip_Tasks_Where_Boolean_Criterias_Are_Not_Fulfilled()
             {
                 // Given

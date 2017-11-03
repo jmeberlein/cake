@@ -61,13 +61,15 @@ namespace Cake.Core.Tests.Unit.Graph
             {
                 // Given
                 var graph = new CakeGraph();
+                graph.Add("start");
+                graph.Add("end");
 
                 // When
                 graph.Connect("start", "end");
 
                 // Then
-                Assert.Equal("start", graph.Edges[0].Start);
-                Assert.Equal("end", graph.Edges[0].End);
+                Assert.Equal("end", graph.Nodes[0].DownOut[0].Name);
+                Assert.Equal("start", graph.Nodes[1].DownIn[0].Name);
             }
 
             [Fact]
@@ -99,34 +101,6 @@ namespace Cake.Core.Tests.Unit.Graph
             }
 
             [Fact]
-            public void Should_Not_Create_Edge_Between_Connected_Nodes_If_An_Edge_Already_Exist()
-            {
-                // Given
-                var graph = new CakeGraph();
-                graph.Connect("start", "end");
-
-                // When
-                graph.Connect("start", "end");
-
-                // Then
-                Assert.Equal(1, graph.Edges.Count);
-            }
-
-            [Fact]
-            public void Should_Not_Create_Edge_Between_Connected_Nodes_If_An_Edge_Already_Exist_Regardless_Of_Casing()
-            {
-                // Given
-                var graph = new CakeGraph();
-                graph.Connect("start", "end");
-
-                // When
-                graph.Connect("START", "END");
-
-                // Then
-                Assert.Equal(1, graph.Edges.Count);
-            }
-
-            [Fact]
             public void Should_Throw_If_Edge_Is_Reflexive()
             {
                 // Given
@@ -138,36 +112,6 @@ namespace Cake.Core.Tests.Unit.Graph
                 // Then
                 Assert.IsType<CakeException>(result);
                 Assert.Equal("Reflexive edges in graph are not allowed.", result?.Message);
-            }
-
-            [Fact]
-            public void Should_Throw_If_Edge_Is_Unidirectional()
-            {
-                // Given
-                var graph = new CakeGraph();
-                graph.Connect("start", "end");
-
-                // When
-                var result = Record.Exception(() => graph.Connect("end", "start"));
-
-                // Then
-                Assert.IsType<CakeException>(result);
-                Assert.Equal("Unidirectional edges in graph are not allowed.", result?.Message);
-            }
-
-            [Fact]
-            public void Should_Throw_If_Edge_Is_Unidirectional_Regardless_Of_Casing()
-            {
-                // Given
-                var graph = new CakeGraph();
-                graph.Connect("start", "end");
-
-                // When
-                var result = Record.Exception(() => graph.Connect("END", "START"));
-
-                // Then
-                Assert.IsType<CakeException>(result);
-                Assert.Equal("Unidirectional edges in graph are not allowed.", result?.Message);
             }
         }
 
@@ -235,14 +179,14 @@ namespace Cake.Core.Tests.Unit.Graph
                 graph.Connect("B", "C");
 
                 // When
-                var result = graph.Traverse("D").ToArray();
+                var result = graph.Traverse("A").ToArray();
 
                 // Then
                 Assert.Equal(4, result.Length);
-                Assert.Equal("A", result[0]);
-                Assert.Equal("B", result[1]);
-                Assert.Equal("C", result[2]);
-                Assert.Equal("D", result[3]);
+                Assert.Equal("D", result[0]);
+                Assert.Equal("C", result[1]);
+                Assert.Equal("B", result[2]);
+                Assert.Equal("A", result[3]);
             }
 
             [Fact]
@@ -255,14 +199,14 @@ namespace Cake.Core.Tests.Unit.Graph
                 graph.Connect("B", "C");
 
                 // When
-                var result = graph.Traverse("d").ToArray();
+                var result = graph.Traverse("a").ToArray();
 
                 // Then
                 Assert.Equal(4, result.Length);
-                Assert.Equal("A", result[0]);
-                Assert.Equal("B", result[1]);
-                Assert.Equal("C", result[2]);
-                Assert.Equal("d", result[3]);
+                Assert.Equal("D", result[0]);
+                Assert.Equal("C", result[1]);
+                Assert.Equal("B", result[2]);
+                Assert.Equal("A", result[3]);
             }
 
             [Fact]
@@ -271,19 +215,19 @@ namespace Cake.Core.Tests.Unit.Graph
                 // Given
                 var graph = new CakeGraph();
                 graph.Connect("A", "B");
-                graph.Connect("B", "C");
+                graph.Connect("C", "E");
                 graph.Connect("B", "D");
                 graph.Connect("D", "E");
 
                 // When
-                var result = graph.Traverse("E").ToArray();
+                var result = graph.Traverse("A").ToArray();
 
                 // Then
                 Assert.Equal(4, result.Length);
-                Assert.Equal("A", result[0]);
-                Assert.Equal("B", result[1]);
-                Assert.Equal("D", result[2]);
-                Assert.Equal("E", result[3]);
+                Assert.Equal("E", result[0]);
+                Assert.Equal("D", result[1]);
+                Assert.Equal("B", result[2]);
+                Assert.Equal("A", result[3]);
             }
 
             [Fact]
@@ -294,10 +238,7 @@ namespace Cake.Core.Tests.Unit.Graph
                 graph.Connect("B", "C");
                 graph.Connect("C", "A");
 
-                var result = Record.Exception(() => graph.Traverse("C"));
-
-                Assert.IsType<CakeException>(result);
-                Assert.Equal("Graph contains circular references.", result?.Message);
+                Assert.Equal(true, graph.ContainsCycles());
             }
         }
     }

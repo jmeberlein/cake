@@ -31,7 +31,7 @@ namespace Cake.Core.Graph
                     }
                     else
                     {
-                        graph.Connect(dependency.Name, task.Name, dependency.PreDependency);
+                        graph.Connect(task.Name, dependency.Name, dependency.PreDependency);
                     }
                 }
 
@@ -48,7 +48,7 @@ namespace Cake.Core.Graph
                     }
                     else
                     {
-                        graph.Connect(task.Name, dependency.Name, dependency.PreDependency);
+                        graph.Connect(dependency.Name, task.Name, dependency.PreDependency);
                     }
                 }
             }
