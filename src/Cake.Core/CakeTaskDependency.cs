@@ -22,14 +22,21 @@ namespace Cake.Core
         public bool Required { get; }
 
         /// <summary>
+        /// Gets a value indicating whether the dependency is a pre-dependency or post-dependency.
+        /// </summary>
+        public bool PreDependency { get; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="CakeTaskDependency"/> class.
         /// </summary>
         /// <param name="name">The name of the task.</param>
         /// <param name="required">Whether or not the dependency is required.</param>
-        public CakeTaskDependency(string name, bool required)
+        /// <param name="predependency">Whether the dependency is a pre-dependency or post-dependency.</param>
+        public CakeTaskDependency(string name, bool required, bool predependency)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Required = required;
+            PreDependency = predependency;
         }
     }
 }

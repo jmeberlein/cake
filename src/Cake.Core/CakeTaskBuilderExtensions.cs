@@ -20,8 +20,11 @@ namespace Cake.Core
         /// <typeparam name="T">The task type.</typeparam>
         /// <param name="builder">The task builder.</param>
         /// <param name="name">The name of the dependent task.</param>
+        /// <param name="required">Whether or not the dependency is required.</param>
+        /// <param name="predependency">Whether the dependency is a pre-dependency or post-dependency.</param>
         /// <returns>The same <see cref="CakeTaskBuilder{T}"/> instance so that multiple calls can be chained.</returns>
-        public static CakeTaskBuilder<T> IsDependentOn<T>(this CakeTaskBuilder<T> builder, string name)
+        public static CakeTaskBuilder<T> IsDependentOn<T>(this CakeTaskBuilder<T> builder, string name,
+            bool required = true, bool predependency = true)
             where T : CakeTask
         {
             if (builder == null)
@@ -29,7 +32,7 @@ namespace Cake.Core
                 throw new ArgumentNullException(nameof(builder));
             }
 
-            builder.Task.AddDependency(name);
+            builder.Task.AddDependency(name, required, predependency);
             return builder;
         }
 
@@ -40,8 +43,11 @@ namespace Cake.Core
         /// <typeparam name="TOther">The task type that this task depends on.</typeparam>
         /// <param name="builder">The task builder.</param>
         /// <param name="other">The name of the dependent task.</param>
+        /// <param name="required">Whether or not the dependency is required.</param>
+        /// <param name="predependency">Whether the dependency is a pre-dependency or post-dependency.</param>
         /// <returns>The same <see cref="CakeTaskBuilder{T}"/> instance so that multiple calls can be chained.</returns>
-        public static CakeTaskBuilder<T> IsDependentOn<T, TOther>(this CakeTaskBuilder<T> builder, CakeTaskBuilder<TOther> other)
+        public static CakeTaskBuilder<T> IsDependentOn<T, TOther>(this CakeTaskBuilder<T> builder, CakeTaskBuilder<TOther> other,
+            bool required = true, bool predependency = true)
             where T : CakeTask
             where TOther : CakeTask
         {
@@ -54,7 +60,7 @@ namespace Cake.Core
                 throw new ArgumentNullException(nameof(other));
             }
 
-            builder.Task.AddDependency(other.Task.Name);
+            builder.Task.AddDependency(other.Task.Name, required, predependency);
             return builder;
         }
 
@@ -64,8 +70,11 @@ namespace Cake.Core
         /// <typeparam name="T">The task type.</typeparam>
         /// <param name="builder">The task builder.</param>
         /// <param name="name">The name of the task the current task will be a dependency of.</param>
+        /// <param name="required">Whether or not the dependency is required.</param>
+        /// <param name="predependency">Whether the dependency is a pre-dependency or post-dependency.</param>
         /// <returns>The same <see cref="CakeTaskBuilder{T}"/> instance so that multiple calls can be chained.</returns>
-        public static CakeTaskBuilder<T> IsDependeeOf<T>(this CakeTaskBuilder<T> builder, string name)
+        public static CakeTaskBuilder<T> IsDependeeOf<T>(this CakeTaskBuilder<T> builder, string name,
+            bool required = true, bool predependency = true)
             where T : CakeTask
         {
             if (builder == null)
@@ -73,7 +82,7 @@ namespace Cake.Core
                 throw new ArgumentNullException(nameof(builder));
             }
 
-            builder.Task.AddReverseDependency(name);
+            builder.Task.AddReverseDependency(name, required, predependency);
             return builder;
         }
 

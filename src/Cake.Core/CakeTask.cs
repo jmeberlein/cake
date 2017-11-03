@@ -92,7 +92,8 @@ namespace Cake.Core
         /// </summary>
         /// <param name="name">The name of the dependency.</param>
         /// <param name="required">Whether or not the dependency is required.</param>
-        public void AddDependency(string name, bool required = true)
+        /// <param name="predependency">Whether the dependency is a predependency or postdependency.</param>
+        public void AddDependency(string name, bool required = true, bool predependency = true)
         {
             if (_dependencies.Any(x => x.Name == name))
             {
@@ -100,7 +101,7 @@ namespace Cake.Core
                 var message = string.Format(CultureInfo.InvariantCulture, format, Name, name);
                 throw new CakeException(message);
             }
-            _dependencies.Add(new CakeTaskDependency(name, required));
+            _dependencies.Add(new CakeTaskDependency(name, required, predependency));
         }
 
         /// <summary>
@@ -108,7 +109,8 @@ namespace Cake.Core
         /// </summary>
         /// <param name="name">The name of the task that this task want to be a dependency of.</param>
         /// <param name="required">Whether or not the dependency is required.</param>
-        public void AddReverseDependency(string name, bool required = true)
+        /// <param name="predependency">Whether the dependency is a predependency or postdependency.</param>
+        public void AddReverseDependency(string name, bool required = true, bool predependency = true)
         {
             if (_reverseDependencies.Any(x => x.Name == name))
             {
@@ -116,7 +118,7 @@ namespace Cake.Core
                 var message = string.Format(CultureInfo.InvariantCulture, format, Name, name);
                 throw new CakeException(message);
             }
-            _reverseDependencies.Add(new CakeTaskDependency(name, required));
+            _reverseDependencies.Add(new CakeTaskDependency(name, required, predependency));
         }
 
         /// <summary>
