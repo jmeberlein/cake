@@ -58,6 +58,11 @@ namespace Cake.Core.Graph
 
                     Index = MinIndex = ++indexCtr;
 
+                    if (indexCtr == int.MaxValue)
+                    {
+                        throw new CakeException("Too many tasks. Must have fewer than MAX_INT.");
+                    }
+
                     foreach (CakeGraphNode node in DownOut.Concat(UpIn).Where(x => stack.Contains(x) || x.Index == 0))
                     {
                         int temp = node.Tarjan();
@@ -166,19 +171,9 @@ namespace Cake.Core.Graph
             }
 
             var targetNode = _nodes.Find(x => x.Name.Equals(target, StringComparison.OrdinalIgnoreCase));
-            var poset = new List<CakeGraphNode>() { targetNode };
+            var poset = new List<CakeGraphNode>();
 
-            for (int i = 0; i < poset.Count; i++)
-            {
-                foreach (CakeGraphNode node in poset[i].DownOut.Union(poset[i].UpOut))
-                {
-                    if (!poset.Contains(node))
-                    {
-                        node.DownCount = node.UpIn.Count + node.DownOut.Count + 1;
-                        poset.Add(node);
-                    }
-                }
-            }
+            RecurseInclude(targetNode, poset);
 
             poset.ForEach(node => node.DownCount = node.UpIn.Union(node.DownOut).Intersect(poset).Count());
             var root = poset.Where(x => x.DownCount == 0).ToList();
@@ -190,14 +185,14 @@ namespace Cake.Core.Graph
                 result.Add(curr.Name);
                 foreach (CakeGraphNode node in curr.UpOut.Concat(curr.DownIn))
                 {
-                    Traverse(node, result, poset);
+                    RecurseTime(node, result, poset);
                 }
             }
 
             return result;
         }
 
-        private void Traverse(CakeGraphNode curr, List<string> result, List<CakeGraphNode> poset)
+        private void RecurseTime(CakeGraphNode curr, List<string> result, List<CakeGraphNode> poset)
         {
             if (--curr.DownCount == 0)
             {
@@ -205,8 +200,24 @@ namespace Cake.Core.Graph
 
                 foreach (CakeGraphNode node in curr.UpOut.Union(curr.DownIn).Intersect(poset))
                 {
-                    Traverse(node, result, poset);
+                    RecurseTime(node, result, poset);
                 }
+            }
+        }
+
+        private void RecurseInclude(CakeGraphNode curr, List<CakeGraphNode> poset)
+        {
+            foreach (CakeGraphNode node in curr.DownOut)
+            {
+                RecurseInclude(node, poset);
+            }
+            if (!poset.Contains(curr))
+            {
+                poset.Add(curr);
+            }
+            foreach (CakeGraphNode node in curr.UpOut)
+            {
+                RecurseInclude(node, poset);
             }
         }
     }
