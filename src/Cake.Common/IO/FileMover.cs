@@ -14,7 +14,7 @@ namespace Cake.Common.IO
 {
     internal static class FileMover
     {
-        public static void MoveFileToDirectory(ICakeContext context, FilePath filePath, DirectoryPath targetDirectoryPath)
+        public static void MoveFileToDirectory(ICakeContext context, FilePath filePath, DirectoryPath targetDirectoryPath, bool force = false)
         {
             if (context == null)
             {
@@ -28,10 +28,10 @@ namespace Cake.Common.IO
             {
                 throw new ArgumentNullException(nameof(targetDirectoryPath));
             }
-            MoveFile(context, filePath, targetDirectoryPath.GetFilePath(filePath));
+            MoveFile(context, filePath, targetDirectoryPath.GetFilePath(filePath), force);
         }
 
-        public static void MoveFiles(ICakeContext context, string pattern, DirectoryPath targetDirectoryPath)
+        public static void MoveFiles(ICakeContext context, string pattern, DirectoryPath targetDirectoryPath, bool force = false)
         {
             if (context == null)
             {
@@ -49,10 +49,10 @@ namespace Cake.Common.IO
                 return;
             }
 
-            MoveFiles(context, files, targetDirectoryPath);
+            MoveFiles(context, files, targetDirectoryPath, force);
         }
 
-        public static void MoveFiles(this ICakeContext context, IEnumerable<FilePath> filePaths, DirectoryPath targetDirectoryPath)
+        public static void MoveFiles(this ICakeContext context, IEnumerable<FilePath> filePaths, DirectoryPath targetDirectoryPath, bool force = false)
         {
             if (context == null)
             {
@@ -80,11 +80,11 @@ namespace Cake.Common.IO
             // Iterate all files and copy them.
             foreach (var filePath in filePaths)
             {
-                MoveFile(context, filePath, targetDirectoryPath.GetFilePath(filePath));
+                MoveFile(context, filePath, targetDirectoryPath.GetFilePath(filePath), force);
             }
         }
 
-        public static void MoveFile(ICakeContext context, FilePath filePath, FilePath targetFilePath)
+        public static void MoveFile(ICakeContext context, FilePath filePath, FilePath targetFilePath, bool force = false)
         {
             if (context == null)
             {
@@ -122,6 +122,12 @@ namespace Cake.Common.IO
 
             // Move the file.
             context.Log.Verbose("Moving file {0} to {1}", filePath.GetFilename(), targetFilePath);
+
+            if (force && System.IO.File.Exists(targetFilePath.MakeAbsolute(context.Environment).ToString()))
+            {
+                var temp = new Core.IO.File(targetFilePath.MakeAbsolute(context.Environment));
+                temp.Delete();
+            }
             file.Move(targetFilePath.MakeAbsolute(context.Environment));
         }
     }

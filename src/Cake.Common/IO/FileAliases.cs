@@ -232,9 +232,9 @@ namespace Cake.Common.IO
         /// </example>
         [CakeMethodAlias]
         [CakeAliasCategory("Move")]
-        public static void MoveFileToDirectory(this ICakeContext context, FilePath filePath, DirectoryPath targetDirectoryPath)
+        public static void MoveFileToDirectory(this ICakeContext context, FilePath filePath, DirectoryPath targetDirectoryPath, bool force = false)
         {
-            FileMover.MoveFileToDirectory(context, filePath, targetDirectoryPath);
+            FileMover.MoveFileToDirectory(context, filePath, targetDirectoryPath, force);
         }
 
         /// <summary>
@@ -250,9 +250,9 @@ namespace Cake.Common.IO
         /// </example>
         [CakeMethodAlias]
         [CakeAliasCategory("Move")]
-        public static void MoveFiles(this ICakeContext context, string pattern, DirectoryPath targetDirectoryPath)
+        public static void MoveFiles(this ICakeContext context, string pattern, DirectoryPath targetDirectoryPath, bool force = false)
         {
-            FileMover.MoveFiles(context, pattern, targetDirectoryPath);
+            FileMover.MoveFiles(context, pattern, targetDirectoryPath, force);
         }
 
         /// <summary>
@@ -269,9 +269,9 @@ namespace Cake.Common.IO
         /// </example>
         [CakeMethodAlias]
         [CakeAliasCategory("Move")]
-        public static void MoveFiles(this ICakeContext context, IEnumerable<FilePath> filePaths, DirectoryPath targetDirectoryPath)
+        public static void MoveFiles(this ICakeContext context, IEnumerable<FilePath> filePaths, DirectoryPath targetDirectoryPath, bool force = false)
         {
-            FileMover.MoveFiles(context, filePaths, targetDirectoryPath);
+            FileMover.MoveFiles(context, filePaths, targetDirectoryPath, force);
         }
 
         /// <summary>
@@ -287,9 +287,9 @@ namespace Cake.Common.IO
         /// </example>
         [CakeMethodAlias]
         [CakeAliasCategory("Move")]
-        public static void MoveFile(this ICakeContext context, FilePath filePath, FilePath targetFilePath)
+        public static void MoveFile(this ICakeContext context, FilePath filePath, FilePath targetFilePath, bool force = false)
         {
-            FileMover.MoveFile(context, filePath, targetFilePath);
+            FileMover.MoveFile(context, filePath, targetFilePath, force);
         }
 
         /// <summary>
